@@ -3,6 +3,11 @@
 SupportDesk is a helpdesk ticketing system I built with Django REST Framework and React.
 Customers raise support tickets, an admin assigns them to agents, agents work on them, and everyone gets an email at each important step through Celery and Redis.
 
+**Live demo:** https://supportdesk-web-aditya.onrender.com (log in with any [demo account](#demo-accounts), password `Demo@12345`)
+**API docs:** https://supportdesk-api-aditya.onrender.com/api/docs/
+
+The demo runs on Render's free plan, so the first request after a quiet period can take about a minute while the server wakes up.
+
 ## Features
 
 **Customer**
