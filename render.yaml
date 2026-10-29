@@ -1,0 +1,86 @@
+# Render Blueprint for an optional deployment.
+# After the first deploy, update the URLs below if Render gives your services different names.
+
+envVarGroups:
+  - name: supportdesk-shared
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: FRONTEND_URL
+        value: https://supportdesk-web.onrender.com
+      - key: PYTHON_VERSION
+        value: "3.13.5"
+
+services:
+  - type: web
+    name: supportdesk-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn config.wsgi:application
+    healthCheckPath: /api/schema/
+    envVars:
+      - fromGroup: supportdesk-shared
+      - key: DJANGO_ALLOWED_HOSTS
+        value: supportdesk-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://supportdesk-web.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://supportdesk-web.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: supportdesk-db
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: supportdesk-redis
+          property: connectionString
+
+  # Background workers are a paid Render feature.
+  - type: worker
+    name: supportdesk-worker
+    runtime: python
+    rootDir: backend
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A config worker -l info
+    envVars:
+      - fromGroup: supportdesk-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: supportdesk-db
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: keyvalue
+          name: supportdesk-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: supportdesk-redis
+    plan: free
+    ipAllowList: []
+
+  - type: web
+    name: supportdesk-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://supportdesk-api.onrender.com/api
+
+databases:
+  - name: supportdesk-db
+    databaseName: supportdesk
+    user: supportdesk
+    plan: free
