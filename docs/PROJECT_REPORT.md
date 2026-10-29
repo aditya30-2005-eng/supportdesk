@@ -696,7 +696,8 @@ While writing the README I checked each endpoint again and saw that `Ticket.cate
 - Refresh token in an httpOnly, SameSite cookie
 - Frontend tests with Vitest and React Testing Library, and browser tests in CI
 - Full-text search with PostgreSQL `SearchVector` for large numbers of tickets
-- Deploying the Render blueprint and adding error monitoring
+- Running a separate Celery worker and Redis in production (the free Render blueprint runs tasks inside the API process)
+- Adding error monitoring
 
 ## 17. Conclusion
 

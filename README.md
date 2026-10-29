@@ -299,7 +299,16 @@ supportdesk/
 
 ## Deployment (optional)
 
-`render.yaml` is a Render Blueprint that describes the API, the Celery worker, Redis (Key Value), PostgreSQL and the static React site. I have not deployed it yet, so the service URLs inside it are the default names and may need to be changed after the first deploy. Background workers are a paid feature on Render.
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/aditya30-2005-eng/supportdesk)
+
+`render.yaml` is a Render Blueprint for the free plan. It creates the Django API, the React static site and a PostgreSQL database, runs the migrations and loads the demo data on every deploy.
+
+The free plan has no background workers, so on Render the Celery tasks run inside the API process (`CELERY_TASK_ALWAYS_EAGER=True`) and the emails are printed in the API service logs. Locally, the full setup with Redis and a separate Celery worker is used.
+
+Notes:
+- If Render adds a suffix to a service name because it is taken, update the three frontend URLs and `VITE_API_URL` in the Render dashboard to the real URLs.
+- A free web service sleeps after 15 minutes without traffic, so the first request after that can take about a minute.
+- The demo passwords are public, so anyone can log in to the live demo. Redeploying resets the demo tickets.
 
 ## Future improvements
 

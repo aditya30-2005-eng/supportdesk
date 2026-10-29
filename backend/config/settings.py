@@ -26,6 +26,9 @@ if not SECRET_KEY:
 
 DEBUG = env_bool("DJANGO_DEBUG")
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+# Render sets this to the service's public host name, so no manual setting is needed there.
+if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+    ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
 INSTALLED_APPS = [
